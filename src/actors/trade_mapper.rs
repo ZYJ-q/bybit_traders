@@ -8,35 +8,36 @@ use crate::actors::database::get_connect;
 use mysql::*;
 use mysql::prelude::*;
 use serde_json::Value;
-// use super::db_data::Trade;
+use super::db_data::Positions;
 
 
 impl TradeMapper {
 
 
+  pub fn get_positions() -> Result<Vec<Positions>> {
+    // 连接数据库
+    let mut conn = get_connect();
+    let res = conn.query_map(
+      r"select * from test_traders",
+      |(tra_id, tra_venue,  tra_currency, api_key, secret_key, r#type, name, alarm, threshold, borrow, amount, wx_hook)| {
+        Positions{ tra_id, tra_venue,  tra_currency, api_key, secret_key, r#type, name, alarm, threshold, borrow, amount, wx_hook }
+      } 
+    ).unwrap();
+    return Ok(res);
+  }
+
+
   // 插入bybit数据
-  pub fn insert_bybit_trade(trades:Vec<Value>, name: &str) -> bool {
+  pub fn insert_bybit_trade(trades:Vec<Value>) -> bool {
     // 连接数据库
     let mut conn = get_connect();
     // let query_id = conn.exec_first(, params)
-    let mut value = "";
-
-
-    if name == "mmteam1" {
-      value =r"INSERT IGNORE INTO mmteam1_traders (tra_order_id, th_id, time, symbol, side, price, qty, quote_qty, commission, type)
-      VALUES (:tra_order_id, :th_id, :time, :symbol, :side, :price, :qty, :quote_qty, :commission, :type)";
-    } else if name == "hmaker05" {
-      value =r"INSERT IGNORE INTO hmaker05_traders (tra_order_id, th_id, time, symbol, side, price, qty, quote_qty, commission, type)
-      VALUES (:tra_order_id, :th_id, :time, :symbol, :side, :price, :qty, :quote_qty, :commission, :type)";
-    } else {
-      value =r"INSERT IGNORE INTO bybit_trader_histories (tra_order_id, th_id, time, symbol, side, price, qty, quote_qty, commission, type)
-      VALUES (:tra_order_id, :th_id, :time, :symbol, :side, :price, :qty, :quote_qty, :commission, :type)";
-    }
 
 
 
     let flag = conn.exec_batch(
-      value,
+      r"INSERT IGNORE INTO bybit_traders (tra_order_id, th_id, time, symbol, side, price, qty, quote_qty, commission, type, name)
+      VALUES (:tra_order_id, :th_id, :time, :symbol, :side, :price, :qty, :quote_qty, :commission, :type, :name)",
       trades.iter().map(|p| params! {
         "th_id" => &p["th_id"],
         "tra_order_id" => &p["tra_order_id"],
@@ -47,7 +48,8 @@ impl TradeMapper {
         "qty" => &p["qty"],
         "quote_qty" => &p["quote_qty"],
         "commission" => &p["commission"],
-        "type" => &p["type"]
+        "type" => &p["type"],
+        "name" => &p["name"],
       })
     );
 

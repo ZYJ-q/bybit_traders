@@ -13,8 +13,6 @@ use bybit_trader::actors::*;
 
 #[warn(unused_mut, unused_variables, dead_code)]
 async fn real_time(
-    binance: &Vec<Value>,
-    bybit: &Vec<Value>,
     // binance_futures_api: BinanceFuturesApi,
     symbols: &Vec<Value>,
     mut ssh_api: SshClient,
@@ -24,7 +22,7 @@ async fn real_time(
     //rece: &mut Receiver<&str>){
     info!("get ready for real time loop");
     let mut running = false;
-    let mut minut_end = 7;
+    let mut minut_end = 2;
     let mut time_minut_id = 1;
 
     // 每个品种的上一个trade_id
@@ -66,142 +64,101 @@ async fn real_time(
         // 成交历史(更新所有)
         info!("trade history");
 
-
-
-        for f_config in bybit {
-            let mut trade_bybit_histories: VecDeque<Value> = VecDeque::new();
-            
-            let bybit_config = f_config.as_object().unwrap();
-            let bybit_futures_api=ByBitFuturesApi::new(
-                bybit_config
-                    .get("base_url")
-                    .unwrap()
-                    .as_str()
-                    .unwrap(),
-                    bybit_config
-                    .get("api_key")
-                    .unwrap()
-                    .as_str()
-                    .unwrap(),
-                    bybit_config
-                    .get("secret_key")
-                    .unwrap()
-                    .as_str()
-                    .unwrap(),
-            );
-            let name = bybit_config.get("name").unwrap().as_str().unwrap();
-            let category = "linear";
-                if let Some(data) = bybit_futures_api.get_order_history(category, &minut_end, &time_minut_id).await {
-                    let v: Value = serde_json::from_str(&data).unwrap();
-                    let result = v.as_object().unwrap().get("result").unwrap().as_object().unwrap();
-                    let category = result.get("category").unwrap().as_str().unwrap();
-                    let list = result.get("list").unwrap().as_array().unwrap();
-                    let mut trade_bybit_object: Map<String, Value> = Map::new();
-                    
-                    for i in list{
-                        let obj = i.as_object().unwrap();
-                        
-                        let time:u64 = obj.get("createdTime").unwrap().as_str().unwrap().parse().unwrap();
-                        let symbol = obj.get("symbol").unwrap().as_str().unwrap();
-                        let th_id = obj.get("orderLinkId").unwrap().as_str().unwrap();
-                        let tra_order_id = obj.get("orderId").unwrap().as_str().unwrap();
-                        let side = obj.get("side").unwrap().as_str().unwrap();
-                        let price = obj.get("avgPrice").unwrap().as_str().unwrap();
-                        let qty = obj.get("cumExecQty").unwrap().as_str().unwrap();
-                        let commission = obj.get("cumExecFee").unwrap().as_str().unwrap();
-                        let quote_qty = obj.get("cumExecValue").unwrap().as_str().unwrap();
-
-                        trade_bybit_object.insert(String::from("tra_order_id"), Value::from(tra_order_id));
-                        trade_bybit_object.insert(String::from("th_id"), Value::from(th_id));
-                        trade_bybit_object.insert(String::from("time"), Value::from(time));
-                        trade_bybit_object.insert(String::from("symbol"), Value::from(symbol));
-                        trade_bybit_object.insert(String::from("side"), Value::from(side));
-                        trade_bybit_object.insert(String::from("price"), Value::from(price));
-                        trade_bybit_object.insert(String::from("qty"), Value::from(qty));
-                        trade_bybit_object.insert(String::from("quote_qty"), Value::from(quote_qty));
-                        trade_bybit_object.insert(String::from("commission"), Value::from(commission));
-                        trade_bybit_object.insert(String::from("type"), Value::from(category));
-
-                    }
-                    trade_bybit_histories.push_back(Value::from(trade_bybit_object));
-                    println!("历史数据{:?}, 名字{}", Vec::from(trade_bybit_histories.clone()), name);
-                }
-    
-            
-    
-            
-            let res = trade_mapper::TradeMapper::insert_bybit_trade(Vec::from(trade_bybit_histories.clone()), name);
-            println!("插入历史交易数据是否成功{},账户名{:?}", res, name);
-    
-             
-        }
+        let bybit = trade_mapper::TradeMapper::get_positions().unwrap();
 
 
 
         for f_config in bybit {
             let mut trade_bybit_histories: VecDeque<Value> = VecDeque::new();
-            
-            let bybit_config = f_config.as_object().unwrap();
-            let bybit_futures_api=ByBitFuturesApi::new(
-                bybit_config
-                    .get("base_url")
-                    .unwrap()
-                    .as_str()
-                    .unwrap(),
-                    bybit_config
-                    .get("api_key")
-                    .unwrap()
-                    .as_str()
-                    .unwrap(),
-                    bybit_config
-                    .get("secret_key")
-                    .unwrap()
-                    .as_str()
-                    .unwrap(),
-            );
-            let name = bybit_config.get("name").unwrap().as_str().unwrap();
-            let category = "spot";
-                if let Some(data) = bybit_futures_api.get_order_history(category, &minut_end, &time_minut_id).await {
-                    let v: Value = serde_json::from_str(&data).unwrap();
-                    let result = v.as_object().unwrap().get("result").unwrap().as_object().unwrap();
-                    let category = result.get("category").unwrap().as_str().unwrap();
-                    let list = result.get("list").unwrap().as_array().unwrap();
-                    let mut trade_bybit_object: Map<String, Value> = Map::new();
-                    
-                    for i in list{
-                        let obj = i.as_object().unwrap();
+
+            if &f_config.tra_venue == "ByBit" {
+                let bybit_futures_api=ByBitFuturesApi::new(
+                    "https://api.bybit.com",
+                        &f_config.api_key,
+                        &f_config.secret_key,
+                );
+                let name = f_config.tra_id;
+                let category = "linear";
+                    if let Some(data) = bybit_futures_api.get_order_history(category, &minut_end, &time_minut_id).await {
+                        let v: Value = serde_json::from_str(&data).unwrap();
+                        let result = v.as_object().unwrap().get("result").unwrap().as_object().unwrap();
+                        let category = result.get("category").unwrap().as_str().unwrap();
+                        let list = result.get("list").unwrap().as_array().unwrap();
+                        let mut trade_bybit_object: Map<String, Value> = Map::new();
                         
-                        let time:u64 = obj.get("createdTime").unwrap().as_str().unwrap().parse().unwrap();
-                        let symbol = obj.get("symbol").unwrap().as_str().unwrap();
-                        let th_id = obj.get("orderLinkId").unwrap().as_str().unwrap();
-                        let tra_order_id = obj.get("orderId").unwrap().as_str().unwrap();
-                        let side = obj.get("side").unwrap().as_str().unwrap();
-                        let price = obj.get("avgPrice").unwrap().as_str().unwrap();
-                        let qty = obj.get("cumExecQty").unwrap().as_str().unwrap();
-                        let commission = obj.get("cumExecFee").unwrap().as_str().unwrap();
-                        let quote_qty = obj.get("cumExecValue").unwrap().as_str().unwrap();
-
-                        trade_bybit_object.insert(String::from("tra_order_id"), Value::from(tra_order_id));
-                        trade_bybit_object.insert(String::from("th_id"), Value::from(th_id));
-                        trade_bybit_object.insert(String::from("time"), Value::from(time));
-                        trade_bybit_object.insert(String::from("symbol"), Value::from(symbol));
-                        trade_bybit_object.insert(String::from("side"), Value::from(side));
-                        trade_bybit_object.insert(String::from("price"), Value::from(price));
-                        trade_bybit_object.insert(String::from("qty"), Value::from(qty));
-                        trade_bybit_object.insert(String::from("quote_qty"), Value::from(quote_qty));
-                        trade_bybit_object.insert(String::from("commission"), Value::from(commission));
-                        trade_bybit_object.insert(String::from("type"), Value::from(category));
-
+                        for i in list{
+                            let obj = i.as_object().unwrap();
+                            
+                            let time:u64 = obj.get("createdTime").unwrap().as_str().unwrap().parse().unwrap();
+                            let symbol = obj.get("symbol").unwrap().as_str().unwrap();
+                            let th_id = obj.get("orderLinkId").unwrap().as_str().unwrap();
+                            let tra_order_id = obj.get("orderId").unwrap().as_str().unwrap();
+                            let side = obj.get("side").unwrap().as_str().unwrap();
+                            let price = obj.get("avgPrice").unwrap().as_str().unwrap();
+                            let qty = obj.get("cumExecQty").unwrap().as_str().unwrap();
+                            let commission = obj.get("cumExecFee").unwrap().as_str().unwrap();
+                            let quote_qty = obj.get("cumExecValue").unwrap().as_str().unwrap();
+    
+                            trade_bybit_object.insert(String::from("tra_order_id"), Value::from(tra_order_id));
+                            trade_bybit_object.insert(String::from("th_id"), Value::from(th_id));
+                            trade_bybit_object.insert(String::from("time"), Value::from(time));
+                            trade_bybit_object.insert(String::from("symbol"), Value::from(symbol));
+                            trade_bybit_object.insert(String::from("side"), Value::from(side));
+                            trade_bybit_object.insert(String::from("price"), Value::from(price));
+                            trade_bybit_object.insert(String::from("qty"), Value::from(qty));
+                            trade_bybit_object.insert(String::from("quote_qty"), Value::from(quote_qty));
+                            trade_bybit_object.insert(String::from("commission"), Value::from(commission));
+                            trade_bybit_object.insert(String::from("type"), Value::from(category));
+                            trade_bybit_object.insert(String::from("name"), Value::from(name));
+    
+                        }
+                        trade_bybit_histories.push_back(Value::from(trade_bybit_object));
+                        println!("历史数据{:?}, 名字{}", Vec::from(trade_bybit_histories.clone()), name);
                     }
-                    trade_bybit_histories.push_back(Value::from(trade_bybit_object));
-                    println!("历史数据{:?}, 名字spot{}", Vec::from(trade_bybit_histories.clone()), name);
-                }
+
+                    let category_spot = "spot";
+
+
+                    if let Some(data) = bybit_futures_api.get_order_history(category_spot, &minut_end, &time_minut_id).await {
+                        let v: Value = serde_json::from_str(&data).unwrap();
+                        let result = v.as_object().unwrap().get("result").unwrap().as_object().unwrap();
+                        let category = result.get("category").unwrap().as_str().unwrap();
+                        let list = result.get("list").unwrap().as_array().unwrap();
+                        let mut trade_bybit_object: Map<String, Value> = Map::new();
+                        
+                        for i in list{
+                            let obj = i.as_object().unwrap();
+                            
+                            let time:u64 = obj.get("createdTime").unwrap().as_str().unwrap().parse().unwrap();
+                            let symbol = obj.get("symbol").unwrap().as_str().unwrap();
+                            let th_id = obj.get("orderLinkId").unwrap().as_str().unwrap();
+                            let tra_order_id = obj.get("orderId").unwrap().as_str().unwrap();
+                            let side = obj.get("side").unwrap().as_str().unwrap();
+                            let price = obj.get("avgPrice").unwrap().as_str().unwrap();
+                            let qty = obj.get("cumExecQty").unwrap().as_str().unwrap();
+                            let commission = obj.get("cumExecFee").unwrap().as_str().unwrap();
+                            let quote_qty = obj.get("cumExecValue").unwrap().as_str().unwrap();
     
-            
+                            trade_bybit_object.insert(String::from("tra_order_id"), Value::from(tra_order_id));
+                            trade_bybit_object.insert(String::from("th_id"), Value::from(th_id));
+                            trade_bybit_object.insert(String::from("time"), Value::from(time));
+                            trade_bybit_object.insert(String::from("symbol"), Value::from(symbol));
+                            trade_bybit_object.insert(String::from("side"), Value::from(side));
+                            trade_bybit_object.insert(String::from("price"), Value::from(price));
+                            trade_bybit_object.insert(String::from("qty"), Value::from(qty));
+                            trade_bybit_object.insert(String::from("quote_qty"), Value::from(quote_qty));
+                            trade_bybit_object.insert(String::from("commission"), Value::from(commission));
+                            trade_bybit_object.insert(String::from("type"), Value::from(category));
+                            trade_bybit_object.insert(String::from("name"), Value::from(name));
     
-            
-            let res = trade_mapper::TradeMapper::insert_bybit_trade(Vec::from(trade_bybit_histories.clone()), name);
-            println!("插入历史交易数据是否成功{},账户名{:?}", res, name);
+                        }
+                        trade_bybit_histories.push_back(Value::from(trade_bybit_object));
+                        println!("历史数据{:?}, 名字spot{}", Vec::from(trade_bybit_histories.clone()), name);
+                    }
+            }
+    
+            let res = trade_mapper::TradeMapper::insert_bybit_trade(Vec::from(trade_bybit_histories.clone()));
+            println!("插入历史交易数据是否成功{}", res);
     
              
         }
@@ -363,7 +320,7 @@ async fn main() {
 
         
         info!("created http client");
-        real_time(binance_future_config,bybit_futures_config,  symbols, ssh_api, wx_robot, 500.0).await;
+        real_time(symbols, ssh_api, wx_robot, 500.0).await;
     });
 
     // 开始任务
