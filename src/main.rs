@@ -204,8 +204,8 @@ async fn real_time(
         // print!("输出的净值数据信息{}", net_worth_res);
 
         // 等待下次执行
-        info!("waiting for next real time task...({})", 1000 * 10);
-        tokio::time::delay_for(Duration::from_millis(1000 * 10)).await;
+        info!("waiting for next real time task...({})", 200 * 10);
+        tokio::time::delay_for(Duration::from_millis(200 * 10)).await;
     }
 }
 
