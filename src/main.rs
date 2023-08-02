@@ -166,10 +166,12 @@ async fn real_time(
 
         let time_min = Local::now().timestamp_millis();
         let last_time_min = time_min - 1000*60*60*24 * minut_end;
+        println!("minut_end{}", minut_end);
+        println!("last_time_min{}, time_min{}", last_time_min, time_min);
         if time_minut_id == 1440 {
             time_minut_id = 2;
             if minut_end != 0 {
-                minut_end -= 2
+                minut_end -= 1
             } else {
                 minut_end = 0
             }
