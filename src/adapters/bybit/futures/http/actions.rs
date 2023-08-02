@@ -65,7 +65,7 @@ impl ByBitFuturesApi {
         if time_id == &2 {
             end_times = time - 1000*60*60*24 * end;
         } else {
-            end_times = last_time + 1000* (time_id -1) * 60
+            end_times = last_time + 1000* (time_id -2) * 60
         }
 
         
