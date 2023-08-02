@@ -62,7 +62,7 @@ impl ByBitFuturesApi {
 
         let mut end_times = 0;
         
-        if time_id == &5 {
+        if time_id == &2 {
             end_times = time - 1000*60*60*24 * end;
         } else {
             end_times = last_time + 1000* (time_id -1) * 60
@@ -70,14 +70,14 @@ impl ByBitFuturesApi {
 
         
         let start_datetime: DateTime<Utc> = DateTime::from_utc(NaiveDateTime::from_timestamp_millis(end_times).unwrap(), Utc,);
-        let end_datetime: DateTime<Utc> = DateTime::from_utc(NaiveDateTime::from_timestamp_millis(&end_times + 1000*1*60).unwrap(), Utc,);
+        let end_datetime: DateTime<Utc> = DateTime::from_utc(NaiveDateTime::from_timestamp_millis(&end_times + 1000*2*60).unwrap(), Utc,);
          
         let end_time= format!("{} ", end_datetime.format("%Y-%m-%d %H:%M:%S"));
         let start_time = format!("{} ", start_datetime.format("%Y-%m-%d %H:%M:%S"));
         println!("-------------bybitend------------{:?}", end_time);
         println!("------------bybitstart----------{}", start_time);
 
-        params.insert(String::from("endTime"), Value::from(&end_times + 1000*1*60));
+        params.insert(String::from("endTime"), Value::from(&end_times + 1000*2*60));
         params.insert(String::from("startTime"), Value::from(end_times));
 
 
