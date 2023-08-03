@@ -88,6 +88,9 @@ async fn real_time(
                         
                         for i in list{
                             let obj = i.as_object().unwrap();
+
+
+                            println!("obj{:?}", obj);
                             
                             let time:u64 = obj.get("updatedTime").unwrap().as_str().unwrap().parse().unwrap();
                             let symbol = obj.get("symbol").unwrap().as_str().unwrap();
