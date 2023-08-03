@@ -92,7 +92,7 @@ async fn real_time(
 
                             println!("obj{:?}", obj);
                             
-                            let time:u64 = obj.get("updatedTime").unwrap().as_str().unwrap().parse().unwrap();
+                            let time:u64 = obj.get("createdTime").unwrap().as_str().unwrap().parse().unwrap();
                             let symbol = obj.get("symbol").unwrap().as_str().unwrap();
                             let th_id = obj.get("orderLinkId").unwrap().as_str().unwrap();
                             let tra_order_id = obj.get("orderId").unwrap().as_str().unwrap();
@@ -132,7 +132,7 @@ async fn real_time(
                         for i in list{
                             let obj = i.as_object().unwrap();
                             
-                            let time:u64 = obj.get("updatedTime").unwrap().as_str().unwrap().parse().unwrap();
+                            let time:u64 = obj.get("createdTime").unwrap().as_str().unwrap().parse().unwrap();
                             let symbol = obj.get("symbol").unwrap().as_str().unwrap();
                             let th_id = obj.get("orderLinkId").unwrap().as_str().unwrap();
                             let tra_order_id = obj.get("orderId").unwrap().as_str().unwrap();
