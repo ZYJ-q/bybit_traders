@@ -55,8 +55,8 @@ impl ByBitFuturesApi {
 
         let now_time = Utc::now().timestamp_millis();
         params.insert(String::from("category"), Value::from(category));
-        params.insert(String::from("limit"), Value::from(50));
-        params.insert(String::from("orderStatus"), Value::from("Filled"));
+        params.insert(String::from("limit"), Value::from(100));
+        // params.insert(String::from("orderStatus"), Value::from("Filled"));
         let time = Local::now().timestamp_millis();
         let last_time = time - 1000*60*60*24 * end;
 
@@ -83,7 +83,7 @@ impl ByBitFuturesApi {
 
         let response = self
             .client
-            .send(Method::GET, "/v5/order/history", true,&mut params)
+            .send(Method::GET, "/v5/execution/list", true,&mut params)
             .await;
 
         let res_data = self.client.check_response_data(response);
