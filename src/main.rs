@@ -81,6 +81,7 @@ async fn real_time(
                 let category = "linear";
                     if let Some(data) = bybit_futures_api.get_order_history(category, &minut_end, &time_minut_id).await {
                         let v: Value = serde_json::from_str(&data).unwrap();
+                        println!("linear的交易历史{}", v);
                         let result = v.as_object().unwrap().get("result").unwrap().as_object().unwrap();
                         let category = result.get("category").unwrap().as_str().unwrap();
                         let list = result.get("list").unwrap().as_array().unwrap();
@@ -127,6 +128,7 @@ async fn real_time(
 
                     if let Some(data) = bybit_futures_api.get_order_history(category_spot, &minut_end, &time_minut_id).await {
                         let v: Value = serde_json::from_str(&data).unwrap();
+                        println!("spot的交易历史{}", v);
                         let result = v.as_object().unwrap().get("result").unwrap().as_object().unwrap();
                         let category = result.get("category").unwrap().as_str().unwrap();
                         let list = result.get("list").unwrap().as_array().unwrap();
@@ -138,7 +140,7 @@ async fn real_time(
                             
                             let time:u64 = obj.get("createdTime").unwrap().as_str().unwrap().parse().unwrap();
                             let symbol = obj.get("symbol").unwrap().as_str().unwrap();
-                            let th_id = obj.get("orderLinkId").unwrap().as_str().unwrap();
+                            let th_id = obj.get("orderId").unwrap().as_str().unwrap();
                             let tra_order_id = obj.get("orderId").unwrap().as_str().unwrap();
                             let side = obj.get("side").unwrap().as_str().unwrap();
                             let price = obj.get("avgPrice").unwrap().as_str().unwrap();
