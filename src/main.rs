@@ -92,7 +92,7 @@ async fn real_time(
                             let obj = i.as_object().unwrap();
 
 
-                            println!("obj{:?}", obj);
+                            // println!("obj{:?}", obj);
                             
                             let time:u64 = obj.get("createdTime").unwrap().as_str().unwrap().parse().unwrap();
                             let symbol = obj.get("symbol").unwrap().as_str().unwrap();

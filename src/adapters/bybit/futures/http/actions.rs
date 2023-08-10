@@ -35,7 +35,7 @@ impl ByBitFuturesApi {
 
         let res_data = self.client.check_response_data(response);
 
-        println!("账户信息11111111111111111111{:?}", res_data);
+        // println!("账户信息11111111111111111111{:?}", res_data);
 
         match res_data {
             Some(data) => {
