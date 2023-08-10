@@ -104,6 +104,15 @@ async fn real_time(
                             let qty = obj.get("execQty").unwrap().as_str().unwrap();
                             let commission = obj.get("execFee").unwrap().as_str().unwrap();
                             let quote_qty = obj.get("execValue").unwrap().as_str().unwrap();
+
+                            match obj.get("isMaker") {
+                                Some(maker) => {
+                                    trade_bybit_object.insert(String::from("is_maker"), Value::Bool(maker.as_bool().unwrap()));
+                                }
+                                None => {
+                                    trade_bybit_object.insert(String::from("is_maker"), Value::Null);
+                                }
+                            }
     
                             trade_bybit_object.insert(String::from("tra_order_id"), Value::from(tra_order_id));
                             trade_bybit_object.insert(String::from("th_id"), Value::from(th_id));
@@ -150,7 +159,16 @@ async fn real_time(
                             let qty = obj.get("execQty").unwrap().as_str().unwrap();
                             let commission = obj.get("execFee").unwrap().as_str().unwrap();
                             let quote_qty = obj.get("execValue").unwrap().as_str().unwrap();
-                            
+
+                            match obj.get("isMaker") {
+                                Some(maker) => {
+                                    trade_bybit_object.insert(String::from("is_maker"), Value::Bool(maker.as_bool().unwrap()));
+                                }
+                                None => {
+                                    trade_bybit_object.insert(String::from("is_maker"), Value::Null);
+                                }
+                            }
+
                             trade_bybit_object.insert(String::from("tra_order_id"), Value::from(tra_order_id));
                             trade_bybit_object.insert(String::from("th_id"), Value::from(th_id));
                             trade_bybit_object.insert(String::from("time"), Value::from(time));
