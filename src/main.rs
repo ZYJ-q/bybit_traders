@@ -100,10 +100,10 @@ async fn real_time(
                             let th_id = obj.get("orderLinkId").unwrap().as_str().unwrap();
                             let tra_order_id = obj.get("orderId").unwrap().as_str().unwrap();
                             let side = obj.get("side").unwrap().as_str().unwrap();
-                            let price = obj.get("avgPrice").unwrap().as_str().unwrap();
-                            let qty = obj.get("cumExecQty").unwrap().as_str().unwrap();
-                            let commission = obj.get("cumExecFee").unwrap().as_str().unwrap();
-                            let quote_qty = obj.get("cumExecValue").unwrap().as_str().unwrap();
+                            let price = obj.get("execPrice").unwrap().as_str().unwrap();
+                            let qty = obj.get("execQty").unwrap().as_str().unwrap();
+                            let commission = obj.get("execFee").unwrap().as_str().unwrap();
+                            let quote_qty = obj.get("execValue").unwrap().as_str().unwrap();
     
                             trade_bybit_object.insert(String::from("tra_order_id"), Value::from(tra_order_id));
                             trade_bybit_object.insert(String::from("th_id"), Value::from(th_id));
@@ -141,16 +141,16 @@ async fn real_time(
                             let mut trade_bybit_object: Map<String, Value> = Map::new();
                             let obj = i.as_object().unwrap();
                             
-                            let time:u64 = obj.get("createdTime").unwrap().as_str().unwrap().parse().unwrap();
+                            let time:u64 = obj.get("execTime").unwrap().as_str().unwrap().parse().unwrap();
                             let symbol = obj.get("symbol").unwrap().as_str().unwrap();
                             let th_id = obj.get("orderLinkId").unwrap().as_str().unwrap();
                             let tra_order_id = obj.get("orderId").unwrap().as_str().unwrap();
                             let side = obj.get("side").unwrap().as_str().unwrap();
-                            let price = obj.get("avgPrice").unwrap().as_str().unwrap();
-                            let qty = obj.get("cumExecQty").unwrap().as_str().unwrap();
-                            let commission = obj.get("cumExecFee").unwrap().as_str().unwrap();
-                            let quote_qty = obj.get("cumExecValue").unwrap().as_str().unwrap();
-    
+                            let price = obj.get("execPrice").unwrap().as_str().unwrap();
+                            let qty = obj.get("execQty").unwrap().as_str().unwrap();
+                            let commission = obj.get("execFee").unwrap().as_str().unwrap();
+                            let quote_qty = obj.get("execValue").unwrap().as_str().unwrap();
+                            
                             trade_bybit_object.insert(String::from("tra_order_id"), Value::from(tra_order_id));
                             trade_bybit_object.insert(String::from("th_id"), Value::from(th_id));
                             trade_bybit_object.insert(String::from("time"), Value::from(time));
