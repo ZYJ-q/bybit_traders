@@ -86,9 +86,10 @@ async fn real_time(
                         let category = result.get("category").unwrap().as_str().unwrap();
                         let list = result.get("list").unwrap().as_array().unwrap();
                         let mut trade_bybit_linear_histories: VecDeque<Value> = VecDeque::new();
-                        let mut trade_bybit_object: Map<String, Value> = Map::new();
+                        
                         
                         for i in list{
+                            let mut trade_bybit_object: Map<String, Value> = Map::new();
                             let obj = i.as_object().unwrap();
 
 
@@ -115,9 +116,10 @@ async fn real_time(
                             trade_bybit_object.insert(String::from("commission"), Value::from(commission));
                             trade_bybit_object.insert(String::from("type"), Value::from(category));
                             trade_bybit_object.insert(String::from("name"), Value::from(name));
+                            trade_bybit_linear_histories.push_back(Value::from(trade_bybit_object));
     
                         }
-                        trade_bybit_linear_histories.push_back(Value::from(trade_bybit_object));
+                        
                         let res = trade_mapper::TradeMapper::insert_bybit_trade(Vec::from(trade_bybit_linear_histories.clone()));
             println!("插入历史交易数据是否成功linear{}, 数据{:?}", res, Vec::from(trade_bybit_linear_histories.clone()));
                         // println!("历史数据{:?}, 名字{}", Vec::from(trade_bybit_histories.clone()), name);
@@ -133,9 +135,10 @@ async fn real_time(
                         let category = result.get("category").unwrap().as_str().unwrap();
                         let list = result.get("list").unwrap().as_array().unwrap();
                         let mut trade_bybit_spot_histories: VecDeque<Value> = VecDeque::new();
-                        let mut trade_bybit_object: Map<String, Value> = Map::new();
+                        
                         
                         for i in list{
+                            let mut trade_bybit_object: Map<String, Value> = Map::new();
                             let obj = i.as_object().unwrap();
                             
                             let time:u64 = obj.get("createdTime").unwrap().as_str().unwrap().parse().unwrap();
@@ -159,9 +162,10 @@ async fn real_time(
                             trade_bybit_object.insert(String::from("commission"), Value::from(commission));
                             trade_bybit_object.insert(String::from("type"), Value::from(category));
                             trade_bybit_object.insert(String::from("name"), Value::from(name));
+                            trade_bybit_spot_histories.push_back(Value::from(trade_bybit_object));
     
                         }
-                        trade_bybit_spot_histories.push_back(Value::from(trade_bybit_object));
+                        
                         // println!("历史数据{:?}, 名字spot{}", Vec::from(trade_bybit_histories.clone()), name);
                         let res = trade_mapper::TradeMapper::insert_bybit_trade(Vec::from(trade_bybit_spot_histories.clone()));
             println!("插入历史交易数据是否成功spot{}, 数据{:?}", res, Vec::from(trade_bybit_spot_histories.clone()));
