@@ -73,8 +73,8 @@ impl TradeMapper {
 
 
     let flag = conn.exec_batch(
-      r"INSERT IGNORE INTO new_bybit_traders (tra_order_id, th_id, time, symbol, side, price, qty, quote_qty, commission, type, name, is_maker)
-      VALUES (:tra_order_id, :th_id, :time, :symbol, :side, :price, :qty, :quote_qty, :commission, :type, :name, :is_maker)",
+      r"INSERT IGNORE INTO new_bybit_traders (tra_order_id, th_id, time, symbol, side, price, qty, quote_qty, commission, type, name, is_maker, exec_id)
+      VALUES (:tra_order_id, :th_id, :time, :symbol, :side, :price, :qty, :quote_qty, :commission, :type, :name, :is_maker, :exec_id)",
       trades.iter().map(|p| params! {
         "th_id" => &p["th_id"],
         "tra_order_id" => &p["tra_order_id"],
@@ -88,6 +88,7 @@ impl TradeMapper {
         "type" => &p["type"],
         "name" => &p["name"],
         "is_maker" => &p["is_maker"].to_string(),
+        "exec_id" => &p["exec_id"],
       })
     );
 
