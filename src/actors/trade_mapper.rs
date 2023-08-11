@@ -32,7 +32,7 @@ impl TradeMapper {
     let mut conn = get_connect();
 
     let flag = conn.exec_batch(
-      r"delete from new_bybit_traders tra_order_id = :tra_order_id and time = :time",
+      r"delete from new_bybit_traders where tra_order_id = :tra_order_id and time = :time",
       trades.iter().map(|p| params! {
         "tra_order_id" => &p["tra_order_id"],
         "time" => &p["time"],
