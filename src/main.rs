@@ -22,7 +22,7 @@ async fn real_time(
     //rece: &mut Receiver<&str>){
     info!("get ready for real time loop");
     let mut running = false;
-    let mut minut_end = 2;
+    let mut minut_end = 7;
     let mut time_minut_id = 1;
 
     // 每个品种的上一个trade_id
@@ -114,6 +114,7 @@ async fn real_time(
                                 trade_bybit_delete_histories.push_back(Value::from(delete_trade_bybit_object));
                                 let res = trade_mapper::TradeMapper::delete_bybit_trade(Vec::from(trade_bybit_delete_histories.clone()));
             println!("删除数据{}, 数据{:?}", res, Vec::from(trade_bybit_delete_histories.clone()));
+            continue;
 
 
                                 
