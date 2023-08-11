@@ -89,6 +89,7 @@ async fn real_time(
                         
                         
                         for i in list{
+                            let mut trade_bybit_delete_histories: VecDeque<Value> = VecDeque::new();
                             let mut trade_bybit_object: Map<String, Value> = Map::new();
                             let obj = i.as_object().unwrap();
 
@@ -104,6 +105,19 @@ async fn real_time(
                             let qty = obj.get("execQty").unwrap().as_str().unwrap();
                             let commission = obj.get("execFee").unwrap().as_str().unwrap();
                             let quote_qty = obj.get("execValue").unwrap().as_str().unwrap();
+                            let exec_type = obj.get("execType").unwrap().as_str().unwrap();
+
+                            if exec_type == "Funding" {
+                                let mut delete_trade_bybit_object: Map<String, Value> = Map::new();
+                                delete_trade_bybit_object.insert(String::from("tra_order_id"), Value::from(tra_order_id));
+                                delete_trade_bybit_object.insert(String::from("time"), Value::from(time));
+                                trade_bybit_delete_histories.push_back(Value::from(delete_trade_bybit_object));
+                                let res = trade_mapper::TradeMapper::delete_bybit_trade(Vec::from(trade_bybit_delete_histories.clone()));
+            println!("插入历史交易数据是否成功spot{}, 数据{:?}", res, Vec::from(trade_bybit_delete_histories.clone()));
+
+
+                                
+                            }
 
                             match obj.get("isMaker") {
                                 Some(maker) => {

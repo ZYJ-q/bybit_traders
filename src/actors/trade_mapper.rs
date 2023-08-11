@@ -27,6 +27,43 @@ impl TradeMapper {
   }
 
 
+  pub fn delete_bybit_trade(trades:Vec<Value>) -> bool {
+    // 连接数据库
+    let mut conn = get_connect();
+
+    let flag = conn.exec_batch(
+      r"delete from new_bybit_traders tra_order_id = :tra_order_id and time = :time",
+      trades.iter().map(|p| params! {
+        "tra_order_id" => &p["tra_order_id"],
+        "time" => &p["time"],
+      })
+    );
+
+  // let um1 = conn.query_map(
+  // "select * from trate_histories",
+  // |(th_id, tra_symbol, tra_order_id, tra_commision, tra_time, is_maker, position_side, price, qty, quote_qty, realized_pnl, side)| {
+  //     Trade{th_id, tra_symbol, tra_order_id, tra_commision, tra_time, is_maker, position_side, price, qty, quote_qty, realized_pnl, side}
+  // }
+  // ).unwrap();
+
+  // println!("查询到的数据{:?}", um1);
+
+    match flag {
+      Ok(_c) => {
+        println!("insert success!");
+        return true;
+      },
+      Err(e) => {
+        eprintln!("error:{}", e);
+        return false;
+      }
+    }
+
+
+
+  }
+
+
   // 插入bybit数据
   pub fn insert_bybit_trade(trades:Vec<Value>) -> bool {
     // 连接数据库
