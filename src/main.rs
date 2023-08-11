@@ -106,20 +106,6 @@ async fn real_time(
                             let commission = obj.get("execFee").unwrap().as_str().unwrap();
                             let quote_qty = obj.get("execValue").unwrap().as_str().unwrap();
                             let exec_type = obj.get("execType").unwrap().as_str().unwrap();
-
-                            if exec_type == "Funding" {
-                                let mut delete_trade_bybit_object: Map<String, Value> = Map::new();
-                                delete_trade_bybit_object.insert(String::from("tra_order_id"), Value::from(tra_order_id));
-                                delete_trade_bybit_object.insert(String::from("time"), Value::from(time));
-                                trade_bybit_delete_histories.push_back(Value::from(delete_trade_bybit_object));
-                                let res = trade_mapper::TradeMapper::delete_bybit_trade(Vec::from(trade_bybit_delete_histories.clone()));
-            println!("删除数据{}, 数据{:?}", res, Vec::from(trade_bybit_delete_histories.clone()));
-            continue;
-
-
-                                
-                            }
-
                             match obj.get("isMaker") {
                                 Some(maker) => {
                                     trade_bybit_object.insert(String::from("is_maker"), Value::Bool(maker.as_bool().unwrap()));
@@ -128,8 +114,19 @@ async fn real_time(
                                     trade_bybit_object.insert(String::from("is_maker"), Value::Null);
                                 }
                             }
-    
-                            trade_bybit_object.insert(String::from("tra_order_id"), Value::from(tra_order_id));
+
+                            if exec_type == "Funding" {
+                                let mut delete_trade_bybit_object: Map<String, Value> = Map::new();
+                                delete_trade_bybit_object.insert(String::from("tra_order_id"), Value::from(tra_order_id));
+                                delete_trade_bybit_object.insert(String::from("time"), Value::from(time));
+                                trade_bybit_delete_histories.push_back(Value::from(delete_trade_bybit_object));
+                                let res = trade_mapper::TradeMapper::delete_bybit_trade(Vec::from(trade_bybit_delete_histories.clone()));
+            println!("删除数据{}, 数据{:?}", res, Vec::from(trade_bybit_delete_histories.clone()));
+
+
+                                
+                            } else {
+                                trade_bybit_object.insert(String::from("tra_order_id"), Value::from(tra_order_id));
                             trade_bybit_object.insert(String::from("th_id"), Value::from(th_id));
                             trade_bybit_object.insert(String::from("time"), Value::from(time));
                             trade_bybit_object.insert(String::from("symbol"), Value::from(symbol));
@@ -141,6 +138,12 @@ async fn real_time(
                             trade_bybit_object.insert(String::from("type"), Value::from(category));
                             trade_bybit_object.insert(String::from("name"), Value::from(name));
                             trade_bybit_linear_histories.push_back(Value::from(trade_bybit_object));
+                                
+                            }
+
+                            
+    
+                            
     
                         }
                         
