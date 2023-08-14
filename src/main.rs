@@ -23,7 +23,7 @@ async fn real_time(
     info!("get ready for real time loop");
     let mut running = false;
     let mut minut_end = 5;
-    let mut time_minut_id = 1;
+    let mut time_minut_id = 2;
 
     // 每个品种的上一个trade_id
     let mut last_trade_ids: HashMap<String, u64> = HashMap::new();
@@ -223,7 +223,7 @@ async fn real_time(
         println!("minut_end{}", minut_end);
         println!("last_time_min{}, time_min{}", last_time_min, time_min);
         if time_minut_id == 1440 {
-            time_minut_id = 1;
+            time_minut_id = 2;
             if minut_end != 0 {
                 minut_end -= 1
             } else {
@@ -231,11 +231,11 @@ async fn real_time(
             }
         } else {
             if last_time_min < time_min {
-                time_minut_id += 1
+                time_minut_id += 2
             } else if last_time_min == time_min  {
                 time_minut_id = time_minut_id
             } else {
-                time_minut_id -= 1
+                time_minut_id -= 2
             }
         }
 
