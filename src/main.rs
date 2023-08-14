@@ -22,7 +22,7 @@ async fn real_time(
     //rece: &mut Receiver<&str>){
     info!("get ready for real time loop");
     let mut running = false;
-    let mut minut_end = 7;
+    let mut minut_end = 6;
     let mut time_minut_id = 1;
 
     // 每个品种的上一个trade_id
@@ -78,6 +78,7 @@ async fn real_time(
                         &f_config.secret_key,
                 );
                 let name = f_config.tra_id;
+                let mut trade_bybit_linear_histories: VecDeque<Value> = VecDeque::new();
                 let category = "linear";
                     if let Some(data) = bybit_futures_api.get_order_history(category, &minut_end, &time_minut_id).await {
                         let v: Value = serde_json::from_str(&data).unwrap();
@@ -85,7 +86,7 @@ async fn real_time(
                         let result = v.as_object().unwrap().get("result").unwrap().as_object().unwrap();
                         let category = result.get("category").unwrap().as_str().unwrap();
                         let list = result.get("list").unwrap().as_array().unwrap();
-                        let mut trade_bybit_linear_histories: VecDeque<Value> = VecDeque::new();
+                        
                         
                         
                         for i in list{
@@ -143,19 +144,18 @@ async fn real_time(
                             trade_bybit_linear_histories.push_back(Value::from(trade_bybit_object));
                                 
                             }
-
-                            
-    
-                            
-    
                         }
                         
-                        let res = trade_mapper::TradeMapper::insert_bybit_trade(Vec::from(trade_bybit_linear_histories.clone()));
-            println!("插入历史交易数据是否成功linear{}, 数据{:?}", res, Vec::from(trade_bybit_linear_histories.clone()));
+                        
                         // println!("历史数据{:?}, 名字{}", Vec::from(trade_bybit_histories.clone()), name);
                     }
 
+                    let res = trade_mapper::TradeMapper::insert_bybit_trade(Vec::from(trade_bybit_linear_histories.clone()));
+            println!("插入历史交易数据是否成功linear{}, 数据{:?}", res, Vec::from(trade_bybit_linear_histories.clone()));
+
                     let category_spot = "spot";
+
+                    let mut trade_bybit_spot_histories: VecDeque<Value> = VecDeque::new();
 
 
                     if let Some(data) = bybit_futures_api.get_order_history(category_spot, &minut_end, &time_minut_id).await {
@@ -164,7 +164,7 @@ async fn real_time(
                         let result = v.as_object().unwrap().get("result").unwrap().as_object().unwrap();
                         let category = result.get("category").unwrap().as_str().unwrap();
                         let list = result.get("list").unwrap().as_array().unwrap();
-                        let mut trade_bybit_spot_histories: VecDeque<Value> = VecDeque::new();
+                        
                         
                         
                         for i in list{
@@ -182,15 +182,6 @@ async fn real_time(
                             let quote_qty = obj.get("execValue").unwrap().as_str().unwrap();
                             let exec_id = obj.get("execId").unwrap().as_str().unwrap();
 
-                            match obj.get("isMaker") {
-                                Some(maker) => {
-                                    trade_bybit_object.insert(String::from("is_maker"), Value::Bool(maker.as_bool().unwrap()));
-                                }
-                                None => {
-                                    trade_bybit_object.insert(String::from("is_maker"), Value::Null);
-                                }
-                            }
-
                             trade_bybit_object.insert(String::from("tra_order_id"), Value::from(tra_order_id));
                             trade_bybit_object.insert(String::from("th_id"), Value::from(th_id));
                             trade_bybit_object.insert(String::from("time"), Value::from(time));
@@ -203,21 +194,27 @@ async fn real_time(
                             trade_bybit_object.insert(String::from("type"), Value::from(category));
                             trade_bybit_object.insert(String::from("name"), Value::from(name));
                             trade_bybit_object.insert(String::from("exec_id"), Value::from(exec_id));
+
+                            match obj.get("isMaker") {
+                                Some(maker) => {
+                                    trade_bybit_object.insert(String::from("is_maker"), Value::Bool(maker.as_bool().unwrap()));
+                                }
+                                None => {
+                                    trade_bybit_object.insert(String::from("is_maker"), Value::Null);
+                                }
+                            }
+
+                            
                             trade_bybit_spot_histories.push_back(Value::from(trade_bybit_object));
     
                         }
                         // println!("历史数据{:?}, 名字spot{}", Vec::from(trade_bybit_histories.clone()), name);
-                        let res = trade_mapper::TradeMapper::insert_bybit_trade(Vec::from(trade_bybit_spot_histories.clone()));
-            println!("插入历史交易数据是否成功spot{}, 数据{:?}", res, Vec::from(trade_bybit_spot_histories.clone()));
+                        
                     }
 
-
-                    
-            }
-    
-            
-    
-             
+                    let res = trade_mapper::TradeMapper::insert_bybit_trade(Vec::from(trade_bybit_spot_histories.clone()));
+            println!("插入历史交易数据是否成功spot{}, 数据{:?}", res, Vec::from(trade_bybit_spot_histories.clone()));      
+            }         
         }
 
 
